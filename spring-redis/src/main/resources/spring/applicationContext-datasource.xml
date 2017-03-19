@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/data/jpa
+    		http://www.springframework.org/schema/data/jpa/spring-jpa-1.8.xsd
+    		">
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:*.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- data source for message -->
+	<bean id="dataSource" class="com.jolbox.bonecp.BoneCPDataSource"
+		destroy-method="close" p:driverClass="${jdbc.driverClassName}"
+		p:jdbcUrl="${jdbc.url}" p:username="${jdbc.username}" p:password="${jdbc.password}"
+		p:partitionCount="${jdbc.partitionCount}" 
+		p:acquireIncrement="${jdbc.acquireIncrement}"
+		p:minConnectionsPerPartition="${jdbc.minConnectionsPerPartition}"
+		p:maxConnectionsPerPartition="${jdbc.maxConnectionsPerPartition}"
+		p:idleConnectionTestPeriodInMinutes="${jdbc.idleConnectionTestPeriodInMinutes}"
+		p:idleMaxAgeInMinutes="${jdbc.idleMaxAgeInMinutes}"
+		p:statementsCacheSize="${jdbc.statementsCacheSize}" />
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		p:dataSource-ref="dataSource">
+		<property name="persistenceUnitName" value="spring-jpa-creditaudit"/>
+		<property name="packagesToScan">
+		<list>
+              <value>com.dongnao.**.entity</value>
+         </list>
+		</property>
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+				<prop key="hibernate.ejb.entitymanager_factory_name">entityManagerFactory1</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+		p:entityManagerFactory-ref="entityManagerFactory" />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="persistenceExceptionTranslationPostProcessor"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+	<jpa:repositories base-package="com.hengxin.**.repository" entity-manager-factory-ref="entityManagerFactory"
+		transaction-manager-ref="transactionManager" />
+
+
+
+	<!--&lt;!&ndash; spring和MyBatis完美整合，不需要mybatis的配置映射文件 &ndash;&gt; -->
+	<!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+	</bean>-->
+	
+	<!--&lt;!&ndash; DAO接口所在包名，Spring会自动查找其下的类 &ndash;&gt; -->
+	<!-- <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.hengxin.shop.repository.mybatis" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean> -->
+		
+</beans>
