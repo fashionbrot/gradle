@@ -39,7 +39,7 @@ public  class TestController {
 		data.getClient().m;*/
 		/*System.out.println(jedisCluster.echo("count"));
 		return "OK";*/
-		System.out.println();
+		System.out.println("111111111");
 		jedisCluster.set(watch_key, "100");
 		return jedisCluster.get(watch_key);
 	}
